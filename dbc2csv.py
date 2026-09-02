@@ -28,7 +28,8 @@ def decode_field(raw: bytes) -> str:
     return raw.decode(ENCODING).strip()
 
 
-def parse_dbf(data: bytes) -> tuple[list[str], list[list[str]]]:
+def parse_dbf_header(data: bytes) -> tuple[int, int, int, list[tuple[str, int]]]:
+    """Lê só o cabeçalho do .dbf: nº de registros, offsets e campos."""
     num_records, header_size, record_length = struct.unpack_from("<IHH", data, 4)
 
     fields = []
@@ -39,12 +40,24 @@ def parse_dbf(data: bytes) -> tuple[list[str], list[list[str]]]:
         fields.append((name, length))
         offset += 32
 
-    header_names = [name for name, _ in fields]
+    return num_records, header_size, record_length, fields
 
+
+def parse_dbf_rows(
+    data: bytes,
+    header_size: int,
+    record_length: int,
+    fields: list[tuple[str, int]],
+    num_records: int,
+) -> list[list[str]]:
+    """Decodifica os registros presentes em `data`, até `num_records` ou até
+    os bytes disponíveis acabarem (útil para amostras parciais)."""
     rows = []
     offset = header_size
     for _ in range(num_records):
         record = data[offset : offset + record_length]
+        if len(record) < record_length:
+            break
         offset += record_length
         if not record or record[0] == DELETED_FLAG:
             continue
@@ -57,6 +70,13 @@ def parse_dbf(data: bytes) -> tuple[list[str], list[list[str]]]:
             pos += length
         rows.append(row)
 
+    return rows
+
+
+def parse_dbf(data: bytes) -> tuple[list[str], list[list[str]]]:
+    num_records, header_size, record_length, fields = parse_dbf_header(data)
+    header_names = [name for name, _ in fields]
+    rows = parse_dbf_rows(data, header_size, record_length, fields, num_records)
     return header_names, rows
 
 

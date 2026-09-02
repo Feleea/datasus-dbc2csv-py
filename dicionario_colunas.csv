@@ -1,0 +1,25 @@
+coluna,descricao
+AP_CODUNI,CNES do estabelecimento executante
+AP_PRIPAL,Código do procedimento principal
+AP_CMP,Competência (AAAAMM)
+AP_MVM,Mês/ano de movimento (AAAAMM)
+AP_CNSPCN,CNS do paciente
+AP_MUNPCN,Município de residência do paciente (IBGE)
+AP_SEXO,Sexo do paciente
+AP_RACACOR,Raça/cor do paciente
+AP_UFMUN,Município do estabelecimento (IBGE)
+PA_CODUNI,CNES do estabelecimento
+PA_PROC_ID,Código do procedimento
+PA_CMP,Competência (AAAAMM)
+PA_CNSMED,CNS do profissional
+PA_MUNPCN,Município de residência do paciente (IBGE)
+PA_VALAPR,Valor aprovado
+CNES,CNES do estabelecimento
+CNES_EXEC,CNES do estabelecimento executante
+N_AIH,Número da AIH
+PROC_SOLIC,Código do procedimento solicitado
+PROC_REA,Código do procedimento realizado
+VAL_TOT,Valor total da AIH
+SP_CNES,CNES do estabelecimento
+SP_PROCREA,Código do procedimento realizado
+SP_NAIH,Número da AIH associada

@@ -100,11 +100,64 @@ convert_dbc_to_csv(dbc_path, csv_path)
 print("Conversão concluída com sucesso!")
 ```
 
+## 📊 Painel web (DuckDB + Streamlit)
+⛔ O painel foi desenvolvido para visualização apenas dos arquivos SIASUS e SIHSUS
+
+`painel.py` é a forma recomendada de explorar os dados já convertidos para
+CSV. Usa [DuckDB](https://duckdb.org/) para consultar os CSVs direto do disco
+(sem duplicar os 2.7GB+ de dados em outro banco), [Streamlit](https://streamlit.io/)
+para a interface web local e [streamlit-aggrid](https://github.com/PablocFonseca/streamlit-aggrid)
+para as tabelas: todas têm filtro e ordenação por coluna (clique no
+cabeçalho, estilo planilha) e uma busca rápida geral.
+
+
+```bash
+streamlit run painel.py
+```
+
+Três abas:
+
+- **Por arquivo**: escolha um sistema (ex.: `ADBA`) e um arquivo específico ou
+  "Todos" (consolidado). Mostra a estrutura de colunas — código, nome real
+  (do `dicionario_colunas.csv`), % preenchido, nº de valores distintos e um
+  exemplo — e os dados paginados. Nas colunas com descrição conhecida, passe
+  o mouse sobre o cabeçalho da tabela de dados para ver o nome real (tooltip).
+- **Visão geral (cruzamento)**: verifica se os mesmos códigos de **CNES** ou
+  de **procedimento** aparecem em mais de um sistema (ex.: um CNES usado em
+  ADBA, ACFBA e RDBA ao mesmo tempo), com contagem total e uma matriz de
+  sobreposição entre cada par de sistemas. Essa consulta varre os arquivos
+  inteiros, então o resultado fica em cache após o primeiro clique.
+- **Detalhe por CNES**: digite um código de CNES e veja, em cada sistema onde
+  ele aparece, o resumo por procedimento (quantidade total, nº de
+  competências, nº de arquivos) e o detalhe linha a linha (procedimento ×
+  competência × arquivo × sistema × quantidade). A competência é extraída do
+  nome do arquivo (ex.: `ADBA2601.csv` → competência `2026-01`), então
+  funciona até para sistemas sem uma coluna própria de competência.
+
+### Dicionário de colunas
+
+`dicionario_colunas.csv` (colunas `coluna,descricao`) traduz os códigos de
+campo do DATASUS para nome legível — hoje só tem um punhado de colunas
+comuns (CNES, procedimento, competência...). Para ampliar, edite esse
+arquivo ou substitua-o por uma lista mais completa: cada linha nova passa a
+aparecer automaticamente no painel (coluna "Nome real" e tooltip).
+
+### Mapeamento de sistemas
+
+`sistemas.py` lista os sistemas DATASUS presentes em `arquivos/csv/` e, para
+cada um, qual coluna representa o CNES e qual representa o procedimento —
+usado pela aba de cruzamento. Se aparecer um novo tipo de arquivo (prefixo)
+na pasta, adicione uma entrada lá para incluí-lo no cruzamento.
+
 ## 📁 Estrutura do Projeto
 
 ```
 datasus-dbc2csv-py/
 ├── dbc2csv.py                  # Script principal de conversão
+├── painel.py                   # Painel web (DuckDB + Streamlit)
+├── dados.py                    # Consultas DuckDB usadas pelo painel
+├── sistemas.py                 # Mapeamento CNES/procedimento por sistema
+├── dicionario_colunas.csv      # Tradução código de coluna -> nome real
 ├── requirements.txt            # Dependências do projeto
 ├── README.md                   # Este arquivo
 └── arquivos/

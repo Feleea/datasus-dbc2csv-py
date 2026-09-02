@@ -1,1 +1,4 @@
 dbc-to-dbf
+duckdb
+streamlit
+streamlit-aggrid
