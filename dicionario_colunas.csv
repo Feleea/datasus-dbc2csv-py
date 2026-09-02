@@ -420,3 +420,52 @@ SP_CIDPRI,CID principal
 SP_CIDSEC,CID secundário
 SP_QT_PROC,Quantidade de procedimentos realizados
 SP_U_AIH,Indicador único da AIH (contabiliza sem repetições)
+AP_TPPRE,Tipo de prestador
+AP_TPATEND,Tipo de atendimento de APAC
+AP_DTOOCOR,Data de ocorrência que substitui a data de fim de validade
+AP_APACAN,Número da APAC anterior
+CO_CIDPRIM,CID principal
+CO_CIDSEC,CID secundário
+AP_COMORB,Indicador de comorbidade (S/N) - laudo complementar de cirurgia bariátrica
+AP_CID_C1,"CID-10 da comorbidade 1 - Diabetes Mellitus (O24.3), se marcada"
+AP_CID_C2,"CID-10 da comorbidade 2 - Dislipidemia (E78.0), se marcada"
+AP_CID_C3,"CID-10 da comorbidade 3 - Artrose (M19.9), se marcada"
+AP_CID_C4,"CID-10 da comorbidade 4 - Apneia (G47.3), se marcada"
+AP_CID_C5,"CID-10 da comorbidade 5 - Hipertensão Arterial Sistêmica (I10), se marcada"
+AP_CID_CO,CID-10 de outra comorbidade informada em campo livre
+AP_MEDICAM,Indicador de uso de medicamentos (S/N)
+AP_POLIVIT,Indicador de uso de polivitamínico (S/N)
+AP_ATV_FIS,Indicador de prática de atividade física (S/N)
+AP_REG_PES,Indicador de reganho de peso pós-cirurgia bariátrica (S/N)
+AP_ADESAO,Indicador de adesão a alimentação saudável e balanceada (S/N)
+AB_T_PRC2,Tempo (em meses) pós cirurgia bariátrica referente ao 2º procedimento reparador
+AB_T_PRC3,Tempo (em meses) pós cirurgia bariátrica referente ao 3º procedimento reparador
+AB_PRCAIH4,Procedimento da AIH referente à 4ª cirurgia plástica reparadora pós-bariátrica
+AB_T_PRC4,Tempo (em meses) pós cirurgia bariátrica referente ao 4º procedimento reparador
+AB_PRCAIH5,Procedimento da AIH referente à 5ª cirurgia plástica reparadora pós-bariátrica
+AB_T_PRC5,Tempo (em meses) pós cirurgia bariátrica referente ao 5º procedimento reparador
+AB_PRCAIH6,Procedimento da AIH referente à 6ª cirurgia plástica reparadora pós-bariátrica
+AB_T_PRC6,Tempo (em meses) pós cirurgia bariátrica referente ao 6º procedimento reparador
+AQ_MED01,Código do 1º medicamento antineoplásico administrado
+AQ_MED02,Código do 2º medicamento antineoplásico administrado
+AQ_MED03,Código do 3º medicamento antineoplásico administrado
+AQ_MED04,Código do 4º medicamento antineoplásico administrado
+AQ_MED05,Código do 5º medicamento antineoplásico administrado
+AQ_MED06,Código do 6º medicamento antineoplásico administrado
+AQ_MED07,Código do 7º medicamento antineoplásico administrado
+AQ_MED08,Código do 8º medicamento antineoplásico administrado
+AQ_MED09,Código do 9º medicamento antineoplásico administrado
+AQ_MED10,Código do 10º medicamento antineoplásico administrado
+PA_SRV_C,Código do serviço especializado / classificação (CNES)
+PA_FNTORC,Código da fonte orçamentária de financiamento
+TIPPRE  ,Tipo de prestador
+PA_CLASS_S,Classificação do serviço
+AIH,Número da AIH
+ANO,Ano de processamento/competência da AIH
+MES,Mês de processamento/competência da AIH
+MUN_MOV,Município do estabelecimento (movimento)
+MUN_RES,Município de residência do paciente
+UF_RES,UF de residência do paciente
+CO_ERRO,Código do erro de crítica/consistência da AIH
+DT_INTER,Data de internação
+FONTE_ORC,Código da fonte orçamentária de financiamento
