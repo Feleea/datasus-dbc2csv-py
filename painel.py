@@ -19,7 +19,6 @@ st.set_page_config(page_title="Painel DATASUS", layout="wide")
 
 PAGE_SIZE = 200
 
-
 def mostrar_grid(df: pd.DataFrame, altura: int = 420, dicas: dict[str, str] | None = None) -> None:
     """Mostra `df` num grid com filtro e ordenação por coluna (clique no
     cabeçalho), igual planilha. `dicas` é um dict coluna -> texto de tooltip
@@ -32,6 +31,11 @@ def mostrar_grid(df: pd.DataFrame, altura: int = 420, dicas: dict[str, str] | No
     for col, texto in (dicas or {}).items():
         if col in df.columns and texto:
             gb.configure_column(col, headerTooltip=texto)
+    # from_dataframe já configura autoSizeStrategy="fitGridWidth", que espreme
+    # todas as colunas para caber na largura do grid (cortando os títulos).
+    # Sobrescrevemos para "fitCellContents", que dá a cada coluna a largura
+    # necessária para mostrar cabeçalho e conteúdo por completo.
+    gb.configure_grid_options(autoSizeStrategy={"type": "fitCellContents"})
     AgGrid(df, gridOptions=gb.build(), height=altura, theme="streamlit")
 
 

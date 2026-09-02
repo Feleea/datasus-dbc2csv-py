@@ -6,7 +6,7 @@ AP_MVM,Mês/ano de movimento (AAAAMM)
 AP_CNSPCN,CNS do paciente
 AP_MUNPCN,Município de residência do paciente (IBGE)
 AP_SEXO,Sexo do paciente
-AP_RACACOR,Raça/cor do paciente
+AP_RACACOR,"Raça/cor do paciente: 01-Branca, 02-Preta, 03-Parda, 04-Amarela, 05-Indígena, 99-Sem informação"
 AP_UFMUN,Município do estabelecimento (IBGE)
 PA_CODUNI,CNES do estabelecimento
 PA_PROC_ID,Código do procedimento
@@ -23,3 +23,400 @@ VAL_TOT,Valor total da AIH
 SP_CNES,CNES do estabelecimento
 SP_PROCREA,Código do procedimento realizado
 SP_NAIH,Número da AIH associada
+AP_CONDIC,Sigla do tipo de gestão no qual o estado ou município está habilitado
+AP_GESTAO,Código da UF + município de gestão (ou UF0000 se sob gestão estadual)
+AP_AUTORIZ,Número da APAC (UFAATsssssssd)
+AP_VL_AP,Valor total da APAC aprovado
+AP_TPUPS,Tipo de estabelecimento
+AP_TIPPRE,Tipo de prestador
+AP_MN_IND,Estabelecimento mantido / individual
+AP_CNPJCPF,CNPJ do estabelecimento executante
+AP_CNPJMNT,CNPJ da mantenedora do estabelecimento
+AP_COIDADE,Código da idade do paciente
+AP_NUIDADE,Número da idade
+AP_UFNACIO,Código da nacionalidade do paciente
+AP_CEPPCN,CEP do paciente
+AP_UFDIF,Indica se a UF de residência do paciente é diferente da UF do estabelecimento
+AP_MNDIF,Indica se o município de residência do paciente é diferente do município do estabelecimento
+AP_DTINIC,Data de início de validade (AAAAMMDD)
+AP_DTFIM,Data de fim de validade (AAAAMMDD)
+AP_TPATEN,Tipo de atendimento de APAC
+AP_TPAPAC,"Indica se a APAC é 1-inicial, 2-continuidade, 3-única"
+AP_MOTSAI,Motivo de saída e permanência
+AP_OBITO,Indicador de óbito
+AP_ENCERR,Indicador de encerramento
+AP_PERMAN,Indicador de permanência
+AP_ALTA,Indicador de alta
+AP_TRANSF,Indicador de transferência
+AP_DTOCOR,Data de ocorrência que substitui a data de fim de validade
+AP_CODEMI,Código do órgão emissor
+AP_CATEND,Caráter do atendimento
+AP_APACANT,Número da APAC anterior
+AP_UNISOL,Código CNES do estabelecimento solicitante
+AP_DTSOLIC,Data da solicitação (AAAAMMDD)
+AP_DTAUT,Data da autorização (AAAAMMDD)
+AP_CIDCAS,CID causas associadas
+AP_CIDPRI,CID principal
+AP_CIDSEC,CID secundário
+AP_ETNIA,Etnia do paciente
+AP_NATJUR,Código da natureza jurídica
+AM_PESO,Peso do paciente em kg (APAC de medicamentos)
+AM_ALTURA,Altura do paciente em cm (APAC de medicamentos)
+AM_TRANSPL,Indicador se o paciente fez transplante
+AM_QTDTRAN,Quantidade de transplantes
+AM_GESTANT,Indicador de gestante (S/N)
+AN_DTPDR,Data da primeira diálise realizada (AAAAMMDD)
+AN_ALTURA,Altura do paciente em cm
+AN_PESO,Peso do paciente em kg
+AN_DIURES,Diurese em ml
+AN_GLICOS,Glicose em mg/dl
+AN_ACEVAS,Acesso vascular (S/N)
+AN_ULSOAB,Ultrassonografia abdominal (S/N)
+AN_TRU,TRU - taxa de redução de ureia
+AN_INTFIS,Quantidade de intervenção de fístula
+AN_CNCDO,Inscrito na lista da CNCDO (S/N)
+AN_ALBUMI,Albumina em g%
+AN_HCV,Indicativo de anticorpos de HCV (P/N)
+AN_HBSAG,Indicativo de HBsAg (P/N)
+AN_HIV,Indicativo de anticorpos de HIV (P/N)
+AN_HB,HB (hemoglobina) em g%
+AQ_CID10,CID-10 - topografia (quimioterapia)
+AQ_LINFIN,Linfonodos regionais invadidos
+AQ_ESTADI,Estádio UICC (0 a 4)
+AQ_GRAHIS,Grau histopatológico
+AQ_DTIDEN,Data da identificação patológica do caso (AAAAMMDD)
+AQ_TRANTE,Tratamentos anteriores (S/N)
+AQ_CIDINI1,CID do 1º tratamento anterior
+AQ_DTINI1,Data de início do 1º tratamento anterior (AAAAMMDD)
+AQ_CIDINI2,CID do 2º tratamento anterior
+AQ_DTINI2,Data de início do 2º tratamento anterior (AAAAMMDD)
+AQ_CIDINI3,CID do 3º tratamento anterior
+AQ_DTINI3,Data de início do 3º tratamento anterior (AAAAMMDD)
+AQ_CONTTR,Continuidade do tratamento (S/N)
+AQ_DTINTR,Data de início do tratamento solicitado (AAAAMMDD)
+AQ_ESQU_P1,Esquema (sigla/abrev.) - 5 primeiras posições
+AQ_TOTMPL,Total de meses planejados
+AQ_TOTMAU,Total de meses autorizados
+AQ_ESQU_P2,Esquema (sigla/abrev.) - 10 últimas posições
+AR_SMRD,Campo específico da APAC de radioterapia
+AR_CID10,CID-10 - topografia (radioterapia)
+AR_LINFIN,Linfonodos regionais invadidos
+AR_ESTADI,Estádio UICC (0 a 4)
+AR_GRAHIS,Grau histopatológico
+AR_DTIDEN,Data da identificação patológica do caso (AAAAMMDD)
+AR_TRANTE,Tratamentos anteriores (S/N)
+AR_CIDINI1,CID do 1º tratamento anterior
+AR_DTINI1,Data de início do 1º tratamento anterior (AAAAMMDD)
+AR_CIDINI2,CID do 2º tratamento anterior
+AR_DTINI2,Data de início do 2º tratamento anterior (AAAAMMDD)
+AR_CIDINI3,CID do 3º tratamento anterior
+AR_DTINI3,Data de início do 3º tratamento anterior (AAAAMMDD)
+AR_CONTTR,Continuidade do tratamento (S/N)
+AR_DTINTR,Data de início do tratamento solicitado (AAAAMMDD)
+AR_FINALI,"Finalidade do tratamento: 1-radical, 2-adjuvante, 3-antiálgica, 4-paliativa, 5-prévia, 6-antihemorrágica"
+AR_CIDTR1,CID topográfico 1º
+AR_CIDTR2,CID topográfico 2º
+AR_CIDTR3,CID topográfico 3º
+AR_NUMC1,Nº de campo/inserções 1º
+AR_INIAR1,Data de início 1º (AAAAMMDD)
+AR_INIAR2,Data de início 2º (AAAAMMDD)
+AR_INIAR3,Data de início 3º (AAAAMMDD)
+AR_FIMAR1,Data de fim 1º (AAAAMMDD)
+AR_FIMAR2,Data de fim 2º (AAAAMMDD)
+AR_FIMAR3,Data de fim 3º (AAAAMMDD)
+AR_NUMC2,Nº de campo/inserções 2º
+AR_NUMC3,Nº de campo/inserções 3º
+AB_IMC,IMC do paciente (cirurgia bariátrica)
+AB_PROCAIH,Procedimento da AIH
+AB_DTCIRUR,Data da cirurgia (AAAAMMDD)
+AB_NUMAIH,Número da AIH
+AB_PRCAIH2,Procedimento da AIH (2º)
+AB_PRCAIH3,Procedimento da AIH (3º)
+AB_NUMAIH2,Número da AIH (2º)
+AB_DTCIRG2,Data da cirurgia (2º) (AAAAMMDD)
+AB_MESACOM,Número em meses de acompanhamento
+AB_ANOACOM,Ano de acompanhamento
+AB_PONTBAR,Pontuação de BAROS
+AB_TABBARR,Tabela de BAROS
+ACF_DUPLEX,Duplex prévio (S/N) - confecção de fístula arteriovenosa
+ACF_USOCAT,Uso de cateter venoso ou outros acessos venosos prévios (S/N)
+ACF_PREFAV,FAV prévia (S/N)
+ACF_FLEBIT,Flebites (S/N)
+ACF_HEMATO,Hematomas (S/N)
+ACF_VEIAVI,Veia visível (S/N)
+ACF_PULSO,Presença de pulso (S/N)
+ACF_VEIDIA,Diâmetro da veia em mm
+ACF_ARTDIA,Diâmetro da artéria em mm
+ACF_FREMIT,Frêmito - vibração perceptível pelo tato
+ATD_CARACT,Característica do tratamento dialítico
+ATD_DTPDR,Data de início da primeira diálise (AAAAMMDD)
+ATD_DTCLI,Data de início da diálise nesta clínica (AAAAMMDD)
+ATD_ACEVAS,Acesso vascular
+ATD_MAISNE,Acompanhado há mais de um ano com nefrologia (S/N/I)
+ATD_SITINI,Situação inicial
+ATD_SITTRA,"Situação de transplante: 1-apto, 2-inapto, 3-recusa, 4-N/A caso novo"
+ATD_SEAPTO,Se apto a transplante (situação do encaminhamento/inscrição)
+ATD_HB,HB (hemoglobina)
+ATD_FOSFOR,Fósforo
+ATD_KTVSEM,Kt/v semanal
+ATD_TRU,TRU - taxa de redução de ureia
+ATD_ALBUMI,Albumina
+ATD_PTH,PTH (hormônio da paratireoide)
+ATD_HIV,Indicativo de anticorpos de HIV (P/N)
+ATD_HCV,Indicativo de anticorpos de HCV (P/N)
+ATD_HBSAG,Indicativo de HBsAg (P/N)
+ATD_INTERC,Internado no mês vigente por intercorrência clínica (S/N/I)
+ATD_SEPERI,"Se em diálise peritoneal, houve peritonite no mês vigente (S/N/I)"
+PA_GESTAO,Código da UF + município do gestor (ou UF0000 se sob gestão estadual)
+PA_CONDIC,Sigla do tipo de gestão no qual o estado ou município está habilitado
+PA_UFMUN,UF + município onde está localizado o estabelecimento
+PA_REGCT,Código da regra contratual
+PA_INCOUT,Incremento outros
+PA_INCURG,Incremento urgência
+PA_TPUPS,Tipo de estabelecimento
+PA_TIPPRE,Tipo de prestador
+PA_MN_IND,Estabelecimento mantido / individual
+PA_CNPJCPF,CNPJ do estabelecimento executante
+PA_CNPJMNT,CNPJ da mantenedora do estabelecimento
+PA_CNPJ_CC,CNPJ do órgão que recebeu por cessão de crédito
+PA_MVM,Data de processamento/movimento (AAAAMM)
+PA_TPFIN,Tipo de financiamento da produção
+PA_SUBFIN,Subtipo de financiamento da produção
+PA_NIVCPL,Complexidade do procedimento
+PA_DOCORIG,"Instrumento de registro de origem: P/S-APAC, C-BPA-C, A-RAAS-AD, B-RAAS-Psicossocial, I-BPA-I"
+PA_AUTORIZ,Número da APAC ou autorização do BPA-I (UFAATsssssssd)
+PA_CBOCOD,Código da ocupação do profissional (CBO)
+PA_MOTSAI,Motivo de saída
+PA_OBITO,Indicador de óbito (APAC)
+PA_ENCERR,Indicador de encerramento (APAC)
+PA_PERMAN,Indicador de permanência (APAC)
+PA_ALTA,Indicador de alta (APAC)
+PA_TRANSF,Indicador de transferência (APAC)
+PA_CIDPRI,CID principal (APAC ou BPA-I)
+PA_CIDSEC,CID secundário (APAC)
+PA_CIDCAS,CID causas associadas (APAC)
+PA_CATEND,Caráter de atendimento (APAC ou BPA-I)
+PA_IDADE,Idade do paciente em anos
+IDADEMIN,Idade mínima do paciente para realização do procedimento
+IDADEMAX,Idade máxima do paciente para realização do procedimento
+PA_FLIDADE,"Compatibilidade com a faixa de idade do SIGTAP: 0-não exigida, 1-compatível, 2-fora da faixa, 3-inexistente, 4-em branco"
+PA_SEXO,Sexo do paciente
+PA_RACACOR,"Raça/cor do paciente: 01-Branca, 02-Preta, 03-Parda, 04-Amarela, 05-Indígena, 99-Sem informação"
+PA_QTDPRO,Quantidade produzida (apresentada)
+PA_QTDAPR,Quantidade aprovada do procedimento
+PA_VALPRO,Valor produzido (apresentado)
+PA_UFDIF,Indica se a UF de residência do paciente é diferente da UF do estabelecimento (0/1)
+PA_MNDIF,Indica se o município de residência do paciente é diferente do município do estabelecimento (0/1)
+PA_DIF_VAL,Diferença do valor unitário (tabela unificada vs valor do gestor) x quantidade aprovada
+NU_VPA_TOT,Valor unitário do procedimento na tabela VPA
+NU_PA_TOT,Valor unitário do procedimento na tabela SIGTAP
+PA_INDICA,"Situação da produção: 0-não aprovado, 5-aprovado total, 6-aprovado parcial"
+PA_CODOCO,Código de ocorrência
+PA_FLQT,Indicador de erro de quantidade produzida
+PA_FLER,Indicador de erro de corpo da APAC
+PA_ETNIA,Etnia do paciente
+PA_VL_CF,Valor do complemento federal
+PA_VL_CL,Valor do complemento local
+PA_VL_INC,Valor do incremento
+PA_SRC_C,Código do serviço especializado / classificação CBO
+PA_INE,Código de identificação nacional de equipes
+PA_NAT_JUR,Código da natureza jurídica
+GESTAO,Código da UF + município do gestor (ou UF0000 se sob gestão estadual)
+CONDIC,Sigla do tipo de gestão no qual o estado ou município está habilitado
+UFMUN,UF + município onde está localizado o estabelecimento
+TPUPS,Tipo de estabelecimento
+TIPPRE,Tipo de prestador
+MN_IND,Estabelecimento mantido / individual
+CNPJCPF,CNPJ do estabelecimento executante
+CNPJMNT,CNPJ da mantenedora do estabelecimento
+DT_PROCESS,Mês/data de processamento (AAAAMM)
+DT_ATEND,Mês do atendimento (AAAAMM)
+CNS_PAC,CNS do paciente (criptografado)
+DTNASC,Data de nascimento do paciente
+TPIDADEPAC,Tipo da idade do paciente (anos/meses/dias)
+IDADEPAC,Idade do paciente
+NACION_PAC,Nacionalidade do paciente
+SEXOPAC,Sexo do paciente
+RACACOR,"Raça/cor do paciente: 01-Branca, 02-Preta, 03-Parda, 04-Amarela, 05-Indígena, 99-Sem informação"
+ETNIA,Etnia do paciente (se raça/cor indígena)
+MUNPAC,UF + município de residência do paciente
+MOT_COB,Motivo de saída/permanência
+DT_MOTCOB,Data da ocorrência (alta, transferência ou óbito)
+CATEND,Caráter de atendimento
+CIDPRI,CID principal
+CIDASSOC,CID causas associadas
+ORIGEM_PAC,Origem do paciente
+DT_INICIO,Data de início do atendimento
+DT_FIM,Data de fim do atendimento
+COB_ESF,Indica cobertura de Estratégia Saúde da Família na região do paciente
+CNES_ESF,CNES da unidade de Saúde da Família da região
+DESTINO_PAC,Destino do paciente (RAAS-AD)
+PA_SRV,Serviço especializado
+PA_CLAS_S,Classificação do serviço
+PA_EQUIPE,Código da equipe (RAAS)
+PA_TP_EQP,Tipo de equipe (RAAS)
+PA_CID,CID do procedimento
+PERMANENCIA,Permanência em atendimento (RAAS-AD)
+QTDATE,Quantidade de atendimentos
+QTDPCN,Quantidade de pacientes
+DESTINOPAC,Destino do paciente (RAAS-Psicossocial)
+QT_APRES,Quantidade apresentada
+QT_APROV,Quantidade aprovada
+SERV,Código do serviço especializado
+CLASS,Código da classificação do serviço
+SIT_RUA,Situação de rua (S/N)
+TP_DROGA,"Tipo de droga: A-Álcool, C-Crack, O-Outros"
+LOC_REALIZ,"Local de realização: C-CAPS, T-Território"
+INICIO,Data de início do atendimento (DDMMAAAA)
+FIM,Data de fim do atendimento (DDMMAAAA)
+PERMANEN,Permanência em atendimento (RAAS-Psicossocial)
+CODUNI,CNES do estabelecimento (BPA-I)
+CNPJ_CC,CNPJ do órgão que recebeu por cessão de crédito
+PROC_ID,Código do procedimento ambulatorial (BPA-I)
+TPFIN,Tipo de financiamento da produção
+SUBFIN,Subtipo de financiamento da produção
+COMPLEX,Complexidade do procedimento
+AUTORIZ,Número da APAC ou autorização do BPA-I
+CNSPROF,CNS do profissional executante
+CBOPROF,Código da ocupação do profissional (CBO)
+VL_APRES,Valor produzido (apresentado)
+VL_APROV,Valor aprovado do procedimento
+UFDIF,Indica se a UF de residência do paciente é diferente da UF do estabelecimento
+MNDIF,Indica se o município de residência do paciente é diferente do município do estabelecimento
+NAT_JUR,Código da natureza jurídica
+UF_ZI,Município gestor
+ANO_CMPT,Ano de processamento da AIH (aaaa)
+MES_CMPT,Mês de processamento da AIH (mm)
+ESPEC,Especialidade do leito
+CGC_HOSP,CNPJ do estabelecimento
+IDENT,Identificação do tipo da AIH
+CEP,CEP do paciente
+MUNIC_RES,Município de residência do paciente
+NASC,Data de nascimento do paciente (aaaammdd)
+SEXO,Sexo do paciente
+UTI_MES_IN,Zerado (histórico)
+UTI_MES_AN,Zerado (histórico)
+UTI_MES_AL,Zerado (histórico)
+UTI_MES_TO,Quantidade de dias de UTI no mês
+MARCA_UTI,Tipo de UTI utilizada pelo paciente
+UTI_INT_IN,Zerado (histórico)
+UTI_INT_AN,Zerado (histórico)
+UTI_INT_AL,Zerado (histórico)
+UTI_INT_TO,Quantidade de diárias em unidade intermediária
+DIAR_ACOM,Quantidade de diárias de acompanhante
+QT_DIARIAS,Quantidade de diárias
+VAL_SH,Valor de serviços hospitalares
+VAL_SP,Valor de serviços profissionais
+VAL_SADT,Zerado (histórico)
+VAL_RN,Zerado (histórico)
+VAL_ACOMP,Zerado (histórico)
+VAL_ORTP,Zerado (histórico)
+VAL_SANGUE,Zerado (histórico)
+VAL_SADTSR,Zerado (histórico)
+VAL_TRANSP,Zerado (histórico)
+VAL_OBSANG,Zerado (histórico)
+VAL_PED1AC,Zerado (histórico)
+VAL_UTI,Valor de UTI
+US_TOT,Valor total em dólar
+DI_INTER,Data de internação (aaaammdd)
+DT_SAIDA,Data de saída (aaaammdd)
+DIAG_PRINC,Código do diagnóstico principal (CID-10)
+DIAG_SECUN,Código do diagnóstico secundário (CID-10; zerado a partir de 2015-01)
+COBRANCA,Motivo de saída/permanência
+NATUREZA,Natureza jurídica do hospital (conteúdo até maio/2012)
+DESTAO,Indica o tipo de gestão do hospital
+RUBRICA,Zerado (histórico)
+IND_VDRL,Indica exame VDRL
+MUNIC_MOV,Município do estabelecimento
+COD_IDADE,Unidade de medida da idade
+IDADE,Idade do paciente
+DIAS_PERM,Dias de permanência
+MORTE,Indica óbito
+NACIONAL,Código da nacionalidade do paciente
+NUM_PROC,Zerado (histórico)
+CAR_INT,Caráter da internação
+TOT_PT_SP,Zerado (histórico)
+CPF_AUT,Zerado (histórico)
+HOMONIMO,Indica se o paciente da AIH é homônimo do paciente de outra AIH
+NUM_FILHOS,Número de filhos do paciente
+INSTRU,Grau de instrução do paciente
+CID_NOTIF,CID de notificação
+CONTRACEP1,Tipo de contraceptivo utilizado
+CONTRACEP2,Segundo tipo de contraceptivo utilizado
+GESTRISCO,Indicador se é gestante de risco
+INSC_PN,Número da gestante no pré-natal
+SEQ_AIH5,Sequencial de longa permanência (AIH tipo 5)
+CBOR,Ocupação do paciente (CBO)
+CNAER,Código de acidente de trabalho
+VINCPREV,Vínculo com a Previdência
+GESTOR_COD,Motivo de autorização da AIH pelo gestor
+GESTOR_TP,Tipo de gestor
+GESTOR_CPF,CPF do gestor
+GESTOR_DT,Data da autorização dada pelo gestor (aaaammdd)
+CNPJ_MANT,CNPJ da mantenedora
+INFEHOSP,Status de infecção hospitalar
+CID_ASSO,CID causa
+CID_MORTE,CID da morte
+FINANC,Tipo de financiamento
+FAEC_TP,Subtipo de financiamento FAEC
+REGCT,Regra contratual
+RACA_COR,Raça/cor do paciente
+SEQUENCIA,Sequencial da AIH na remessa
+REMESSA,Número/nome da remessa
+AUD_JUST,Justificativa do auditor para aceitação da AIH sem CNS
+SIS_JUST,Justificativa do estabelecimento para aceitação da AIH sem CNS
+VAL_SH_FED,Valor do complemento federal de serviços hospitalares (incluído no valor total)
+VAL_SP_FED,Valor do complemento federal de serviços profissionais (incluído no valor total)
+VAL_SH_GES,Valor do complemento do gestor de serviços hospitalares (incluído no valor total)
+VAL_SP_GES,Valor do complemento do gestor de serviços profissionais (incluído no valor total)
+VAL_UCI,Valor de UCI
+MARCA_UCI,Tipo de UCI utilizada pelo paciente
+DIAGSEC1,Diagnóstico secundário 1
+DIAGSEC2,Diagnóstico secundário 2
+DIAGSEC3,Diagnóstico secundário 3
+DIAGSEC4,Diagnóstico secundário 4
+DIAGSEC5,Diagnóstico secundário 5
+DIAGSEC6,Diagnóstico secundário 6
+DIAGSEC7,Diagnóstico secundário 7
+DIAGSEC8,Diagnóstico secundário 8
+DIAGSEC9,Diagnóstico secundário 9
+TPDISEC1,Tipo de diagnóstico secundário 1
+TPDISEC2,Tipo de diagnóstico secundário 2
+TPDISEC3,Tipo de diagnóstico secundário 3
+TPDISEC4,Tipo de diagnóstico secundário 4
+TPDISEC5,Tipo de diagnóstico secundário 5
+TPDISEC6,Tipo de diagnóstico secundário 6
+TPDISEC7,Tipo de diagnóstico secundário 7
+TPDISEC8,Tipo de diagnóstico secundário 8
+TPDISEC9,Tipo de diagnóstico secundário 9
+SP_GESTOR,UF + código do município de gestão (ou UF0000 se sob gestão estadual)
+SP_UF,Unidade da federação
+SP_AA,Ano da internação
+SP_MM,Mês da internação
+SP_DTINTER,Data da internação
+SP_DTSAIDA,Data de saída
+SP_NUM_PR,Zerado (histórico)
+SP_TIPO,Zerado (histórico)
+SP_CPFCGC,CNES, CPF ou CNPJ do prestador do serviço do ato profissional
+SP_ATOPROF,Procedimento referente ao ato profissional
+SP_TP_ATO,Zerado (histórico)
+SP_QTD_ATO,Quantidade de atos profissionais
+SP_PTSP,Quantidade de pontos
+SP_NF,Nota fiscal do material (órtese/prótese) ou data do ato
+SP_VALATO,Valor do ato profissional
+SP_M_HOSP,Município de localização do estabelecimento executante da AIH
+SP_M_PAC,Município de residência do paciente
+SP_DES_HOS,Indica se a UF de residência do paciente é diferente da UF do estabelecimento
+SP_DES_PAC,Indica se a UF de residência do paciente é diferente da UF do estabelecimento
+SP_COMPLEX,Complexidade do ato profissional
+SP_FINANC,Tipo de financiamento do ato profissional
+SP_CO_FAEC,Tipo (04-FAEC) + subtipo de financiamento do ato profissional
+SP_PF_CBO,Código de ocupação (CBO) do profissional que realizou o ato
+SP_PF_DOC,Documento de pessoa jurídica
+SP_PJ_DOC,Documento de pessoa física
+IN_TP_VAL,"Tipo de valor: 1-SP, 2-SH"
+SERV_CLA,Serviço/classificação
+SP_CIDPRI,CID principal
+SP_CIDSEC,CID secundário
+SP_QT_PROC,Quantidade de procedimentos realizados
+SP_U_AIH,Indicador único da AIH (contabiliza sem repetições)
