@@ -27,7 +27,20 @@ def mostrar_grid(df: pd.DataFrame, altura: int = 420, dicas: dict[str, str] | No
         st.info("Sem dados para exibir.")
         return
     gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_default_column(filter=True, sortable=True, resizable=True, floatingFilter=True)
+    gb.configure_default_column(
+        filter=True,
+        sortable=True,
+        resizable=True,
+        floatingFilter=True,
+        wrapHeaderText=True,
+        autoHeaderHeight=True,
+    )
+    for col in df.columns:
+        # minWidth garante o título visível mesmo se o autosize abaixo errar
+        # a largura de alguma coluna (ele mede o conteúdo, não sempre o
+        # cabeçalho); wrapHeaderText permite o título quebrar em duas linhas
+        # em vez de ser cortado com "...".
+        gb.configure_column(col, minWidth=max(90, len(str(col)) * 8 + 40))
     for col, texto in (dicas or {}).items():
         if col in df.columns and texto:
             gb.configure_column(col, headerTooltip=texto)
@@ -253,6 +266,8 @@ with aba_cnes:
             .reset_index()
             .rename(columns={"procedimento": "Procedimento", "sistema": "Sistema"})
         )
-        colunas_competencia = sorted(c for c in detalhado.columns if c not in ("Procedimento", "Sistema"))
+        colunas_competencia = sorted(
+            (c for c in detalhado.columns if c not in ("Procedimento", "Sistema")), reverse=True
+        )
         detalhado = detalhado[["Procedimento", "Sistema", *colunas_competencia]]
         mostrar_grid(detalhado)
