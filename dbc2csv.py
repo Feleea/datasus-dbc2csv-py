@@ -5,6 +5,7 @@ Sem pandas, sem pysus: usa dbctodbf (puro Python) só para descomprimir o
 """
 import csv
 import struct
+import time
 from pathlib import Path
 
 from dbctodbf import DBCDecompress
@@ -99,17 +100,27 @@ def main() -> None:
         return
 
     ok, falhas = 0, 0
-    for dbc_path in dbc_files:
+    total = len(dbc_files)
+    inicio_total = time.perf_counter()
+    for i, dbc_path in enumerate(dbc_files, start=1):
         csv_path = CSV_DIR / f"{dbc_path.stem}.csv"
+        progresso = f"Processando arquivo {i} de {total}: {dbc_path.name}"
+        print(progresso, end="\r", flush=True)
+        inicio = time.perf_counter()
         try:
             convert_dbc_to_csv(dbc_path, csv_path)
-            print(f"OK   {dbc_path.name} -> {csv_path.name}")
+            duracao = time.perf_counter() - inicio
+            linha = f"OK   {dbc_path.name} -> {csv_path.name} ({duracao:.2f}s)"
+            print(linha.ljust(len(progresso)))
             ok += 1
         except Exception as exc:
-            print(f"FALHA {dbc_path.name}: {exc}")
+            duracao = time.perf_counter() - inicio
+            linha = f"FALHA {dbc_path.name}: {exc} ({duracao:.2f}s)"
+            print(linha.ljust(len(progresso)))
             falhas += 1
+    tempo_total = time.perf_counter() - inicio_total
 
-    print(f"\nConcluído: {ok} convertido(s), {falhas} falha(s).")
+    print(f"\nConcluído: {ok} convertido(s), {falhas} falha(s). Tempo total: {tempo_total:.2f}s")
 
 
 if __name__ == "__main__":
