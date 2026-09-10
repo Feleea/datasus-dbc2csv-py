@@ -12,6 +12,7 @@ import pandas as pd
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
 
+import cache
 import dados
 from sistemas import SISTEMAS, SISTEMAS_POR_PREFIXO
 
@@ -67,36 +68,112 @@ def get_grupos():
     return dados.listar_arquivos()
 
 
+@st.cache_resource
+def _faxina_inicial():
+    """Descarta entradas de cache antigas uma vez por processo."""
+    return cache.descartar_antigos()
+
+
+_faxina_inicial()
+
+
+# As buscas caras passam por duas camadas de cache: o @st.cache_data guarda
+# o resultado na memória enquanto o painel está de pé, e o cache.memoizar
+# guarda em disco, para a busca continuar instantânea depois de reiniciar.
+# A paginação dos dados (get_amostra) fica só na memória de propósito: são
+# consultas baratas e gravar cada página visitada encheria o disco à toa.
+
+
 @st.cache_data(show_spinner="Calculando estatísticas do arquivo (primeira vez pode demorar)...")
 def get_schema(grupo: str, arquivo: str):
-    con = get_conexao()
-    grupos = get_grupos()
-    paths = grupos[grupo] if arquivo == "__todos__" else [p for p in grupos[grupo] if p.name == arquivo]
-    return dados.schema_e_estatisticas(con, paths, get_dicionario())
+    paths = dados.paths_do_grupo(grupo, arquivo)
+    resultado = cache.memoizar(
+        "schema",
+        {"grupo": grupo, "arquivo": arquivo},
+        dados.fingerprint(paths),
+        lambda: dados.schema_e_estatisticas(get_conexao(), paths, get_dicionario()),
+    )
+    # Vindo do cache em disco a tupla volta como lista (JSON não tem tupla);
+    # normaliza para o retorno ser o mesmo nos dois caminhos.
+    total, schema = resultado
+    return total, schema
 
 
 @st.cache_data
 def get_amostra(grupo: str, arquivo: str, pagina: int):
-    con = get_conexao()
-    grupos = get_grupos()
-    paths = grupos[grupo] if arquivo == "__todos__" else [p for p in grupos[grupo] if p.name == arquivo]
-    return dados.amostra(con, paths, PAGE_SIZE, pagina * PAGE_SIZE)
+    paths = dados.paths_do_grupo(grupo, arquivo)
+    return dados.amostra(get_conexao(), paths, PAGE_SIZE, pagina * PAGE_SIZE)
 
 
 @st.cache_data(show_spinner="Cruzando dados entre todos os sistemas (pode levar mais de um minuto)...")
 def get_cruzamento(campo: str):
-    con = get_conexao()
-    return dados.cruzamento(con, campo)
+    paths = dados.paths_cruzamento(campo)
+    return cache.memoizar(
+        "cruzamento",
+        {"campo": campo},
+        dados.fingerprint(paths),
+        lambda: dados.cruzamento(get_conexao(), campo),
+    )
 
 
 @st.cache_data(show_spinner="Buscando o CNES em todos os sistemas (pode levar dezenas de segundos)...")
 def get_detalhe_cnes(cnes: str):
-    con = get_conexao()
-    return dados.detalhe_cnes(con, cnes)
+    paths = dados.paths_detalhe_cnes()
+    return cache.memoizar(
+        "detalhe_cnes",
+        {"cnes": cnes},
+        dados.fingerprint(paths),
+        lambda: dados.detalhe_cnes(get_conexao(), cnes),
+    )
 
 
 dicionario = get_dicionario()
 grupos = get_grupos()
+
+
+def _formatar_bytes(n: int) -> str:
+    if n >= 1024 ** 3:
+        return f"{n / 1024 ** 3:.1f} GB"
+    if n >= 1024 ** 2:
+        return f"{n / 1024 ** 2:.0f} MB"
+    return f"{n / 1024:.0f} KB"
+
+
+with st.sidebar:
+    st.header("Desempenho")
+
+    status = dados.status_parquet()
+    if status["total"] == 0:
+        st.info("Nenhum CSV encontrado em `arquivos/csv`.")
+    elif status["convertidos"] == status["total"]:
+        st.success(
+            f"Camada Parquet completa: {status['convertidos']} arquivo(s), "
+            f"{_formatar_bytes(status['bytes_parquet'])} "
+            f"(contra {_formatar_bytes(status['bytes_csv'])} em CSV)."
+        )
+    else:
+        st.warning(
+            f"{status['convertidos']} de {status['total']} arquivo(s) convertidos para Parquet. "
+            "Os demais são lidos do CSV — correto, porém bem mais lento."
+        )
+        st.caption("Para acelerar, rode no terminal:")
+        st.code("python csv2parquet.py", language="bash")
+
+    st.header("Cache de buscas")
+    info = cache.estatisticas()
+    st.caption(
+        f"{info['entradas']} busca(s) salva(s) em disco — {_formatar_bytes(info['bytes'])}. "
+        "Buscas repetidas voltam instantâneas, mesmo depois de reiniciar o painel."
+    )
+    if st.button("Limpar cache de buscas", width="stretch"):
+        apagadas = cache.limpar()
+        st.cache_data.clear()
+        st.success(f"{apagadas} busca(s) apagada(s).")
+    st.caption(
+        "O cache se invalida sozinho quando um CSV é adicionado, alterado ou "
+        f"removido. Entradas com mais de {cache.VALIDADE_DIAS} dias são descartadas na abertura."
+    )
+
 
 st.title("Painel DATASUS")
 
@@ -117,8 +194,12 @@ with aba_arquivo:
     with col_sel2:
         arquivo = st.selectbox(
             "Arquivo",
-            options=["__todos__"] + arquivos_do_grupo,
-            format_func=lambda a: f"Todos ({len(arquivos_do_grupo)} arquivos, consolidado)" if a == "__todos__" else a,
+            options=[dados.TODOS_OS_ARQUIVOS] + arquivos_do_grupo,
+            format_func=lambda a: (
+                f"Todos ({len(arquivos_do_grupo)} arquivos, consolidado)"
+                if a == dados.TODOS_OS_ARQUIVOS
+                else a
+            ),
         )
 
     total, schema = get_schema(prefixo, arquivo)

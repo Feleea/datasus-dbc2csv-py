@@ -1,12 +1,23 @@
-"""Camada de dados: conecta o DuckDB aos CSVs em arquivos/csv e expõe as
+"""Camada de dados: conecta o DuckDB aos arquivos em arquivos/ e expõe as
 consultas usadas pelo painel (painel.py).
 
-Os arquivos não são copiados para dentro de um banco — o DuckDB lê os .csv
-direto do disco, então os 2.7GB de dados nunca são duplicados.
+Os dados não são copiados para dentro de um banco — o DuckDB lê os
+arquivos direto do disco, então os 16GB nunca são duplicados dentro de um
+banco relacional.
+
+Duas fontes possíveis para o mesmo dado:
+- os .csv originais em arquivos/csv;
+- a cópia em Parquet em arquivos/parquet, gerada por csv2parquet.py.
+
+O Parquet é preferido sempre que estiver em dia, porque é ~20x menor e
+~75x mais rápido de filtrar; quando não está, a leitura cai de volta no
+CSV automaticamente (ver `parquet_em_dia`).
 """
 from __future__ import annotations
 
 import csv
+import hashlib
+import json
 import re
 from pathlib import Path
 
@@ -15,7 +26,12 @@ import duckdb
 from sistemas import SISTEMAS, Sistema
 
 CSV_DIR = Path("arquivos/csv")
+PARQUET_DIR = Path("arquivos/parquet")
+MANIFESTO_PATH = PARQUET_DIR / "_manifesto.json"
 DICIONARIO_PATH = Path("dicionario_colunas.csv")
+
+# Valor usado pelo painel no seletor de arquivo para dizer "o grupo inteiro".
+TODOS_OS_ARQUIVOS = "__todos__"
 
 # Opções de leitura tolerantes ao CSV do DATASUS: alguns campos numéricos
 # usam vírgula como separador decimal sem escapar corretamente, o que
@@ -60,13 +76,158 @@ def competencia_do_arquivo(nome_arquivo: str) -> str:
     return f"20{ano}-{mes}"
 
 
-def _read_csv_expr(paths: list[Path]) -> str:
-    lista = ", ".join(f"'{p.as_posix()}'" for p in paths)
-    return f"read_csv([{lista}], {_READ_CSV_OPTS})"
+# ---------- camada Parquet (cópia rápida dos CSVs) ----------
+#
+# Um .parquet é considerado "em dia" quando o manifesto registra, para ele,
+# a mesma assinatura (tamanho + data de modificação) que o CSV tem agora.
+# Assinatura diferente = o CSV foi reconvertido/substituído desde então, e
+# a leitura volta a usar o CSV. Assim a camada Parquet nunca serve dado
+# velho: no pior caso ela é ignorada até csv2parquet.py rodar de novo.
+
+
+def assinatura(path: Path) -> str:
+    info = path.stat()
+    return f"{info.st_size}:{int(info.st_mtime)}"
+
+
+def caminho_parquet(csv_path: Path) -> Path:
+    return PARQUET_DIR / f"{csv_path.stem}.parquet"
+
+
+def ler_manifesto() -> dict[str, str]:
+    """Mapa nome do CSV -> assinatura do CSV que gerou o .parquet atual."""
+    if not MANIFESTO_PATH.exists():
+        return {}
+    try:
+        return json.loads(MANIFESTO_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        # Manifesto ilegível é tratado como "nada convertido": as consultas
+        # ficam lentas, mas continuam corretas.
+        return {}
+
+
+def escrever_manifesto(manifesto: dict[str, str]) -> None:
+    PARQUET_DIR.mkdir(parents=True, exist_ok=True)
+    MANIFESTO_PATH.write_text(json.dumps(manifesto, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def parquet_em_dia(csv_path: Path, manifesto: dict[str, str] | None = None) -> bool:
+    manifesto = ler_manifesto() if manifesto is None else manifesto
+    if manifesto.get(csv_path.name) != assinatura(csv_path):
+        return False
+    return caminho_parquet(csv_path).exists()
+
+
+def converter_para_parquet(con: duckdb.DuckDBPyConnection, csv_path: Path) -> Path:
+    """Grava o CSV como Parquet comprimido (ZSTD).
+
+    Escreve num arquivo temporário e só então renomeia, para que uma
+    conversão interrompida (Ctrl+C, falta de disco) não deixe um .parquet
+    truncado ocupando o lugar de um bom.
+    """
+    destino = caminho_parquet(csv_path)
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    temporario = destino.with_name(destino.name + ".tmp")
+    con.execute(
+        f"COPY (SELECT * FROM read_csv(['{csv_path.as_posix()}'], {_READ_CSV_OPTS})) "
+        f"TO '{temporario.as_posix()}' (FORMAT PARQUET, COMPRESSION ZSTD)"
+    )
+    temporario.replace(destino)
+    return destino
+
+
+def status_parquet() -> dict:
+    """Cobertura da camada Parquet, para o painel mostrar na barra lateral."""
+    manifesto = ler_manifesto()
+    csvs = sorted(CSV_DIR.glob("*.csv"))
+    em_dia = [p for p in csvs if parquet_em_dia(p, manifesto)]
+    return {
+        "total": len(csvs),
+        "convertidos": len(em_dia),
+        "bytes_csv": sum(p.stat().st_size for p in csvs),
+        "bytes_parquet": sum(caminho_parquet(p).stat().st_size for p in em_dia),
+    }
+
+
+# ---------- leitura (Parquet quando dá, CSV quando não) ----------
+
+
+def _lista_sql(paths: list[Path]) -> str:
+    return ", ".join(f"'{p.as_posix()}'" for p in paths)
+
+
+def _fonte_expr(paths: list[Path]) -> str:
+    """Expressão de FROM que lê `paths` da melhor fonte disponível.
+
+    No meio de uma conversão (parte dos arquivos já em Parquet, parte não)
+    os dois lados são unidos por nome de coluna — as duas leituras são
+    all-varchar, então os tipos batem.
+    """
+    if not paths:
+        raise ValueError("Nenhum arquivo para consultar.")
+
+    manifesto = ler_manifesto()
+    parquets: list[Path] = []
+    csvs: list[Path] = []
+    for path in paths:
+        if parquet_em_dia(path, manifesto):
+            parquets.append(caminho_parquet(path))
+        else:
+            csvs.append(path)
+
+    partes = []
+    if parquets:
+        partes.append(f"SELECT * FROM read_parquet([{_lista_sql(parquets)}], union_by_name=true)")
+    if csvs:
+        partes.append(f"SELECT * FROM read_csv([{_lista_sql(csvs)}], {_READ_CSV_OPTS})")
+    return "(" + " UNION ALL BY NAME ".join(partes) + ")"
+
+
+def fingerprint(paths: list[Path]) -> str:
+    """Identidade do conjunto de dados lido, usada para invalidar o cache
+    de resultados (cache.py).
+
+    Usa a assinatura dos CSVs, não dos Parquets: converter para Parquet não
+    muda nenhum valor, então um resultado já calculado continua válido
+    depois da conversão e não precisa ser recalculado.
+    """
+    partes = [f"{p.name}:{assinatura(p)}" for p in sorted(paths)]
+    return hashlib.sha256("|".join(partes).encode()).hexdigest()[:16]
+
+
+# ---------- quais arquivos cada consulta lê (para o fingerprint) ----------
+
+
+def paths_do_grupo(grupo: str, arquivo: str) -> list[Path]:
+    """Arquivos de um grupo; `arquivo == TODOS_OS_ARQUIVOS` pega o grupo todo."""
+    do_grupo = listar_arquivos().get(grupo, [])
+    if arquivo == TODOS_OS_ARQUIVOS:
+        return do_grupo
+    return [p for p in do_grupo if p.name == arquivo]
+
+
+def paths_cruzamento(campo: str) -> list[Path]:
+    grupos = listar_arquivos()
+    return [
+        path
+        for s in SISTEMAS
+        if getattr(s, campo) is not None
+        for path in grupos.get(s.prefixo, [])
+    ]
+
+
+def paths_detalhe_cnes() -> list[Path]:
+    grupos = listar_arquivos()
+    return [
+        path
+        for s in SISTEMAS
+        if s.coluna_cnes is not None and s.coluna_procedimento is not None
+        for path in grupos.get(s.prefixo, [])
+    ]
 
 
 def colunas(con: duckdb.DuckDBPyConnection, paths: list[Path]) -> list[str]:
-    expr = _read_csv_expr(paths)
+    expr = _fonte_expr(paths)
     return [c[0] for c in con.execute(f"SELECT * FROM {expr} LIMIT 0").description]
 
 
@@ -79,7 +240,7 @@ def schema_e_estatisticas(
     Roda em uma única passada pelo dado (uma consulta agregada só) em vez de
     uma consulta por coluna, senão o custo escala muito com o nº de colunas.
     """
-    expr = _read_csv_expr(paths)
+    expr = _fonte_expr(paths)
     cols = colunas(con, paths)
 
     selects = ["COUNT(*) AS total_geral"]
@@ -113,7 +274,7 @@ def schema_e_estatisticas(
 
 
 def amostra(con: duckdb.DuckDBPyConnection, paths: list[Path], limite: int, offset: int) -> list[dict]:
-    expr = _read_csv_expr(paths)
+    expr = _fonte_expr(paths)
     return con.execute(f"SELECT * FROM {expr} LIMIT {limite} OFFSET {offset}").fetchdf().to_dict(orient="records")
 
 
@@ -131,7 +292,7 @@ def _uniao_por_campo(sistemas: list[Sistema], campo: str) -> str | None:
         paths = listar_arquivos().get(s.prefixo, [])
         if not paths:
             continue
-        expr = _read_csv_expr(paths)
+        expr = _fonte_expr(paths)
         partes.append(
             f"SELECT DISTINCT '{s.prefixo}' AS sistema, \"{coluna}\" AS valor FROM {expr} "
             f"WHERE \"{coluna}\" IS NOT NULL AND \"{coluna}\" <> ''"
@@ -196,7 +357,7 @@ def detalhe_cnes(con: duckdb.DuckDBPyConnection, cnes: str) -> list[dict]:
         if sistema.coluna_cnes is None or sistema.coluna_procedimento is None:
             continue
         for path in grupos.get(sistema.prefixo, []):
-            expr = _read_csv_expr([path])
+            expr = _fonte_expr([path])
             competencia = competencia_do_arquivo(path.name)
             partes.append(
                 f"SELECT '{sistema.prefixo}' AS sistema, '{path.name}' AS arquivo, "

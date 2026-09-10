@@ -112,6 +112,7 @@ cabeçalho, estilo planilha) e uma busca rápida geral.
 
 
 ```bash
+python csv2parquet.py     # uma vez, para o painel ficar rápido (ver abaixo)
 streamlit run painel.py
 ```
 
@@ -134,6 +135,55 @@ Três abas:
   nome do arquivo (ex.: `ADBA2601.csv` → competência `2026-01`), então
   funciona até para sistemas sem uma coluna própria de competência.
 
+### ⚡ Desempenho: camada Parquet + cache de buscas
+
+Os CSVs convertidos somam ~16GB (13GB só de `PABA`), e consultar CSV exige
+reparsear o arquivo inteiro a cada busca. Duas camadas resolvem isso, e
+**nenhuma das duas toca nos CSVs originais** — tudo é derivado e
+descartável.
+
+**1. Camada Parquet (`csv2parquet.py`)** — a mesma base em Parquet ocupa
+~20x menos espaço e filtra ~75x mais rápido. É o que deixa rápida também
+a busca **nova**, nunca feita antes:
+
+| | CSV | Parquet |
+|---|---|---|
+| Um arquivo `PABA` | 653 MB | 32 MB |
+| Filtro por CNES nesse arquivo | 2,3s | 0,03s |
+| Busca de CNES em todos os sistemas | ~60s | ~1s |
+
+```bash
+python csv2parquet.py            # converte o que falta ou mudou (~5 min na 1ª vez)
+python csv2parquet.py --forcar   # reconverte tudo do zero
+python csv2parquet.py --limpar   # apaga a camada Parquet inteira
+```
+
+Rode de novo sempre que converter DBCs novos — a execução é incremental
+(compara tamanho e data de modificação de cada CSV com o registrado em
+`arquivos/parquet/_manifesto.json`), então leva segundos se nada mudou, e
+apaga sozinha os `.parquet` cujo CSV não existe mais. Se um `.parquet`
+estiver desatualizado ou faltando, `dados.py` lê aquele arquivo do CSV
+automaticamente: a camada pode ficar para trás sem nunca devolver dado
+velho — no máximo fica lento.
+
+**2. Cache de buscas (`cache.py`)** — guarda em `arquivos/cache/` o
+resultado das consultas caras (estrutura das colunas, cruzamento entre
+sistemas e detalhe por CNES), um JSON por busca. O `@st.cache_data` do
+Streamlit já cobre a repetição dentro da sessão, mas some ao reiniciar;
+este sobrevive. A paginação dos dados fica de fora de propósito: é barata
+e gravar cada página visitada encheria o disco à toa.
+
+Cada entrada guarda o *fingerprint* (tamanho + data de modificação) dos
+arquivos que a originaram, então ela se invalida sozinha quando um CSV é
+adicionado, alterado ou removido. Entradas com mais de 30 dias são
+descartadas na abertura do painel, e a barra lateral tem um botão
+**Limpar cache de buscas**. Converter para Parquet **não** invalida o
+cache — o fingerprint é o dos CSVs, e a conversão não muda nenhum valor.
+
+A barra lateral do painel mostra o estado das duas camadas: quantos
+arquivos estão em Parquet, quanto espaço ocupam e quantas buscas estão
+salvas.
+
 ### Dicionário de colunas
 
 `dicionario_colunas.csv` (colunas `coluna,descricao`) traduz os códigos de
@@ -153,9 +203,11 @@ na pasta, adicione uma entrada lá para incluí-lo no cruzamento.
 
 ```
 datasus-dbc2csv-py/
-├── dbc2csv.py                  # Script principal de conversão
+├── dbc2csv.py                  # Script principal de conversão (DBC -> CSV)
+├── csv2parquet.py              # Camada Parquet: cópia rápida dos CSVs
 ├── painel.py                   # Painel web (DuckDB + Streamlit)
 ├── dados.py                    # Consultas DuckDB usadas pelo painel
+├── cache.py                    # Cache em disco dos resultados das buscas
 ├── sistemas.py                 # Mapeamento CNES/procedimento por sistema
 ├── dicionario_colunas.csv      # Tradução código de coluna -> nome real
 ├── requirements.txt            # Dependências do projeto
@@ -165,11 +217,21 @@ datasus-dbc2csv-py/
     │   ├── ABOBA2601.dbc
     │   ├── ABOBA2602.dbc
     │   └── ...
-    └── csv/                    # 📤 Arquivos convertidos são salvos aqui
-        ├── ABOBA2601.csv
-        ├── ABOBA2602.csv
-        └── ...
+    ├── csv/                    # 📤 Arquivos convertidos são salvos aqui
+    │   ├── ABOBA2601.csv
+    │   ├── ABOBA2602.csv
+    │   └── ...
+    ├── parquet/                # ⚡ Derivado dos CSVs (csv2parquet.py)
+    │   ├── _manifesto.json     #    assinatura do CSV que gerou cada .parquet
+    │   ├── ABOBA2601.parquet
+    │   └── ...
+    └── cache/                  # ⚡ Resultados de buscas já feitas (cache.py)
+        └── detalhe_cnes-<hash>.json
 ```
+
+As pastas `parquet/` e `cache/` são 100% derivadas e podem ser apagadas a
+qualquer momento — o painel continua correto, só volta a ficar lento até
+serem regeradas.
 
 ## 🔍 Como Funciona
 
