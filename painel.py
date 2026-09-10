@@ -10,7 +10,7 @@ Rodar com: streamlit run painel.py
 """
 import pandas as pd
 import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
 import cache
 import dados
@@ -20,10 +20,17 @@ st.set_page_config(page_title="Painel DATASUS", layout="wide")
 
 PAGE_SIZE = 200
 
-def mostrar_grid(df: pd.DataFrame, altura: int = 420, dicas: dict[str, str] | None = None) -> None:
+def mostrar_grid(
+    df: pd.DataFrame,
+    altura: int = 420,
+    dicas: dict[str, str] | None = None,
+    colunas_subtotal: list[str] | None = None,
+) -> None:
     """Mostra `df` num grid com filtro e ordenação por coluna (clique no
     cabeçalho), igual planilha. `dicas` é um dict coluna -> texto de tooltip
-    (nome real do campo)."""
+    (nome real do campo). Se `colunas_subtotal` for passado, essas colunas
+    numéricas ganham uma linha fixa no topo com a soma das linhas visíveis
+    (respeitando os filtros aplicados, recalculada no navegador)."""
     if df.empty:
         st.info("Sem dados para exibir.")
         return
@@ -35,6 +42,9 @@ def mostrar_grid(df: pd.DataFrame, altura: int = 420, dicas: dict[str, str] | No
         floatingFilter=True,
         wrapHeaderText=True,
         autoHeaderHeight=True,
+        # Permite até 3 condições no filtro de coluna (ex.: "A" OR "B" OR "C"),
+        # em vez do padrão de 2. Recurso da edição Community do AG Grid.
+        filterParams={"maxNumConditions": 3},
     )
     for col in df.columns:
         # minWidth garante o título visível mesmo se o autosize abaixo errar
@@ -50,7 +60,46 @@ def mostrar_grid(df: pd.DataFrame, altura: int = 420, dicas: dict[str, str] | No
     # Sobrescrevemos para "fitCellContents", que dá a cada coluna a largura
     # necessária para mostrar cabeçalho e conteúdo por completo.
     gb.configure_grid_options(autoSizeStrategy={"type": "fitCellContents"})
-    AgGrid(df, gridOptions=gb.build(), height=altura, theme="streamlit")
+    grid_options = gb.build()
+
+    if colunas_subtotal:
+        coluna_rotulo = next((c for c in df.columns if c not in colunas_subtotal), df.columns[0])
+        linha_subtotal = {c: "" for c in df.columns}
+        linha_subtotal[coluna_rotulo] = "Subtotal (filtrado)"
+        for c in colunas_subtotal:
+            linha_subtotal[c] = int(df[c].sum())
+        grid_options["pinnedTopRowData"] = [linha_subtotal]
+        # Recalcula a linha fixa no navegador (sem round-trip ao Streamlit)
+        # somando só as linhas que sobrevivem ao filtro atual.
+        grid_options["onFilterChanged"] = JsCode(
+            f"""
+            function(params) {{
+                const colunasSubtotal = {colunas_subtotal!r};
+                const colunaRotulo = {coluna_rotulo!r};
+                const soma = {{}};
+                colunasSubtotal.forEach(c => soma[c] = 0);
+                params.api.forEachNodeAfterFilter(node => {{
+                    if (!node.data) return;
+                    colunasSubtotal.forEach(c => {{
+                        const v = node.data[c];
+                        soma[c] += (typeof v === "number" ? v : 0);
+                    }});
+                }});
+                const linha = {{}};
+                linha[colunaRotulo] = "Subtotal (filtrado)";
+                colunasSubtotal.forEach(c => linha[c] = soma[c]);
+                params.api.setGridOption("pinnedTopRowData", [linha]);
+            }}
+            """
+        )
+
+    AgGrid(
+        df,
+        gridOptions=grid_options,
+        height=altura,
+        theme="streamlit",
+        allow_unsafe_jscode=bool(colunas_subtotal),
+    )
 
 
 @st.cache_resource
@@ -351,4 +400,4 @@ with aba_cnes:
             (c for c in detalhado.columns if c not in ("Procedimento", "Sistema")), reverse=True
         )
         detalhado = detalhado[["Procedimento", "Sistema", *colunas_competencia]]
-        mostrar_grid(detalhado)
+        mostrar_grid(detalhado, colunas_subtotal=colunas_competencia)
